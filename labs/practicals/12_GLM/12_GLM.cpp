@@ -118,4 +118,51 @@ int main()
 	float a7 = m1[0][0];
 	m1[1] = vec4(2.0); // Sets the second column to all 2.0
 
+
+
+	// 12.2.2 Matrix Addition
+
+	mat4 m2(1.0f, 2.0f, 3.0f, 4.0f,
+		5.0f, 6.0f, 7.0f, 8.0f,
+		9.0f, 10.0f, 11.0f, 12.0f,
+		13.0f, 14.0f, 15.0f, 16.0f);
+	mat4 m3(1.0f, 2.0f, 1.0f, 2.0f,
+		5.0f, 5.0f, 5.0f, 5.0f,
+		9.0f, 10.0f, 9.0f, 10.0f,
+		0.0f, 0.0f, 1.0f, 2.0f);
+
+	mat4 sum1 = m2 + m3;
+
+
+
+	// 12.2.3 Matrix Scaling
+
+	mat4 s = 5.0f * m2;
+
+
+
+	// 12.2.4 Matric Multiplication
+
+	mat2 m4(1.0f, 2.0f, 2.0f, 5.0f);
+	mat3 m5(1.0f);
+
+	mat2 mul4 = m4 * m4;
+	mat3 mul5 = m5 * m5;
+
+	vec4 a8 = m2 * c6;
+
+
+
+	// 12.3.1 Translation Matrix
+
+	mat4 T1 = translate(mat4(1.0f), vec3(1, 2, 3));
+
+	//vec3 dog = vec3(T1 * vec4(b2, 1.0f));  // ?
+
+
+
+	// 12.3.2 Rotation Matrix
+
+	//mat4 Rx = rotate(mat4(1.0f), 90, vec3(1.0f, 0.0f, 0.0f));
+
 }
