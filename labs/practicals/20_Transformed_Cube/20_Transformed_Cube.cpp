@@ -13,30 +13,32 @@ float rho = 0.0f;
 vec3 pos(0.0f, 0.0f, 0.0f);
 float s = 1.0f;
 
+float total_time = 0.0f;
+
 bool load_content() {
   // Create cube data - twelve triangles triangles
   // Positions
   vector<vec3> positions{
       // *********************************
       // Add the position data for triangles here, (6 verts per side)
-      // Front
-
-
-      // Back
-
-
-      // Right
-
-
-      // Left
-
-
-      // Top
-
-
-      // Bottom
-
-
+	  // Front
+	  vec3(-1.0f, -1.0f, 1.0f), vec3(1.0f, -1.0f, 1.0f), vec3(-1.0f, 1.0f, 1.0f),
+	  vec3(1.0f, -1.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), vec3(-1.0f, 1.0f, 1.0f),
+	  // Back
+	  vec3(-1.0f, -1.0f, -1.0f), vec3(-1.0f, 1.0f, -1.0f), vec3(1.0f, -1.0f, -1.0f),
+	  vec3(1.0f, -1.0f, -1.0f), vec3(-1.0f, 1.0f, -1.0f), vec3(1.0f, 1.0f, -1.0f),
+	  // Right
+	  vec3(1.0f, -1.0f, 1.0f), vec3(1.0f, -1.0f, -1.0f), vec3(1.0f, 1.0f, 1.0f),
+	  vec3(1.0f, -1.0f, -1.0f), vec3(1.0f, 1.0f, -1.0f), vec3(1.0f, 1.0f, 1.0f),
+	  // Left
+	  vec3(-1.0f, -1.0f, -1.0f), vec3(-1.0f, -1.0f, 1.0f), vec3(-1.0f, 1.0f, 1.0f),
+	  vec3(-1.0f, 1.0f, 1.0f), vec3(-1.0f, 1.0f, -1.0f), vec3(-1.0f, -1.0f, -1.0f),
+	  // Top
+	  vec3(-1.0f, 1.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, 1.0f,-1.0f),
+	  vec3(1.0f, 1.0f, -1.0f), vec3(-1.0f, 1.0f, -1.0f), vec3(-1.0f, 1.0f, 1.0f),
+	  // Bottom
+	  vec3(1.0f, -1.0f, 1.0f), vec3(-1.0f, -1.0f, 1.0f), vec3(1.0f, -1.0f, -1.0f),
+	  vec3(-1.0f, -1.0f, 1.0f), vec3(-1.0f, -1.0f,-1.0f), vec3(1.0f, -1.0f, -1.0f),
       // *********************************
   };
   // Colours
@@ -68,36 +70,27 @@ bool update(float delta_time) {
   // WSAD - movement
   // Cursor - rotation
   // O decrease scale, P increase scale
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	// Accumulate time
+	total_time += delta_time;
+	// Update the scale - base on sin wave
+	s = 1.0f + sinf(total_time);
+	// Multiply by 5
+	s *= 5.0f;
+	// Increment theta - half a rotation per second
+	theta += pi<float>() * delta_time;
+	// Check if key is pressed
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
+		pos += vec3(0.0f, 0.0f, -5.0f) * delta_time;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
+		pos += vec3(0.0f, 0.0f, 5.0f) * delta_time;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
+		pos += vec3(-5.0f, 0.0f, 0.0f) * delta_time;
+	}
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
+		pos += vec3(5.0f, 0.0f, 0.0f) * delta_time;
+	}
   // *********************************
   // Update the camera
   cam.update(delta_time);
@@ -110,10 +103,10 @@ bool render() {
   mat4 T, R, S, M;
   // *********************************
   // Create transformation matrix
-
-
-
-
+  R = rotate(mat4(1.0f), theta, vec3(0.0f, 0.0f, 1.0f));
+  S = scale(mat4(1.0f), vec3(s));
+  T = translate(mat4(1.0f), pos);
+  M = T * (R * S);
   // *********************************
   // Create MVP matrix
   auto V = cam.get_view();
