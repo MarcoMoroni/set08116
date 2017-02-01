@@ -19,13 +19,16 @@ void divide_triangle(const vector<vec3> &points, int divisions, vector<vec3> &po
     // *********************************
 	  if (divisions > 0)
 	  {
-		  auto m0 = (points[0] + points[1]) / (points[0] + points[1]).length;
-		  auto m1 = (points[0] + points[2]) / (points[0] + points[2]).length;
-		  auto m2 = (points[1] + points[2]) / (points[1] + points[2]).length;
+		  auto m0 = (points[0] + points[1]);
+		  auto m1 = (points[0] + points[2]);
+		  auto m2 = (points[1] + points[2]);
+		  m0 = normalize(m0);
+		  m1 = normalize(m1);
+		  m2 = normalize(m2);
 		  divide_triangle({ points[0], m0, m1 }, divisions - 1, positions, colours);
 		  divide_triangle({ points[2], m1, m2 }, divisions - 1, positions, colours);
 		  divide_triangle({ points[1], m2, m0 }, divisions - 1, positions, colours);
-		  divide_triangle({ m0, m1, m2 }, divisions - 1, positions, colours);
+		  divide_triangle({ m0, m2, m1 }, divisions - 1, positions, colours);
 	  }
 	  else
 	  {
