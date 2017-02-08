@@ -76,6 +76,7 @@ bool update(float delta_time) {
     dir += vec3(10.0f, 0.0f, 0.0f);
   }
   cam.set_position(cam.get_position() + dir * delta_time);
+  //cam.move(dir);
   // Update the camera
   cam.update(delta_time);
   return true;
