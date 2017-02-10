@@ -16,9 +16,9 @@ double cursor_y = 0.0;
 bool initialise() {
   // *********************************
   // Set input mode - hide the cursor
-
+	glfwSetInputMode(renderer::get_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   // Capture initial mouse position
-
+	glfwSetCursorPos(renderer::get_window(), cursor_x, cursor_y);
   // *********************************
 
   return true;
@@ -62,8 +62,8 @@ bool load_content() {
   tex = texture("textures/checker.png");
 
   // Load in shaders
-  eff.add_shader("31_Texturing_Shader/simple_texture.vert", GL_VERTEX_SHADER);
-  eff.add_shader("31_Texturing_Shader/simple_texture.frag", GL_FRAGMENT_SHADER);
+  eff.add_shader("27_Texturing_Shader/simple_texture.vert", GL_VERTEX_SHADER);
+  eff.add_shader("27_Texturing_Shader/simple_texture.frag", GL_FRAGMENT_SHADER);
   // Build effect
   eff.build();
 
@@ -88,51 +88,51 @@ bool update(float delta_time) {
   double current_y;
   // *********************************
   // Get the current cursor position
-
+  glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
   // Calculate delta of cursor positions from last frame
-
-
+  double delta_x = current_x - cursor_x;
+  double delta_y = current_y - cursor_y;
   // Multiply deltas by ratios and delta_time - gets actual change in orientation
-
-
+  delta_x *= ratio_width;
+  delta_y *= ratio_height;
   // Rotate cameras by delta
   // delta_y - x-axis rotation
   // delta_x - y-axis rotation
-
+  cam.rotate(delta_y, delta_x);
   // Use keyboard to move the target_mesh- WSAD
   // Also remember to translate camera
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
+	  auto translation = vec3(0.0f, 0.0f, -0.3f);
+	  target_mesh.get_transform().position += translation;
+	  cam.translate(translation);
+  }
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
+	  auto translation = vec3(-0.3f, 0.0f, -0.0f);
+	  target_mesh.get_transform().position += translation;
+	  cam.translate(translation);
+  }
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
+	  auto translation = vec3(0.3f, 0.0f, -0.0f);
+	  target_mesh.get_transform().position += translation;
+	  cam.translate(translation);
+  }
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
+	  auto translation = vec3(0.0f, 0.0f, 0.3f);
+	  target_mesh.get_transform().position += translation;
+	  cam.translate(translation);
+  }
   // Use UP and DOWN to change camera distance
+  if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP)) {
 
-
-
-
-
-
+  }
+  else if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN)) {
+	  
+  }
   // Update the camera
-
+  cam.update(delta_time);
   // Update cursor pos
-
-
+  cursor_x = current_x;
+  cursor_y = current_y;
   // *********************************
   return true;
 }

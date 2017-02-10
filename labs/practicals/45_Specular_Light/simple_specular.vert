@@ -28,7 +28,7 @@ layout(location = 0) out vec4 vertex_colour;
 void main() {
   // *********************************
   // Calculate position
-
+  gl_Position = MVP * vec4(position, 1.0);
   // Transform the normal
 
   // Calculate world position
@@ -40,10 +40,10 @@ void main() {
   // Calculate k
 
   // Calculate specular
-
+  
   // Ensure alpha is 1
-
+  
   // Output vertex colour - just diffuse
-
+  
   // *********************************
 }
