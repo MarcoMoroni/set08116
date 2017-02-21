@@ -48,41 +48,31 @@ bool load_content() {
   // - all emissive is black
   // - all specular is white
   // - all shininess is 25
-  // Red box
-
-
-
-
-  // Green tetra
-
-
-
-
-  // Blue pyramid
-
-
-
-
-  // Yellow disk
-
-
-
-
-  // Magenta cylinder
-
-
-
-
-  // Cyan sphere
-
-
-
-
-  // White torus
-
-
-
-
+	// Red box
+	material mat;
+	mat.set_emissive(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	mat.set_specular(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	mat.set_diffuse(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	mat.set_shininess(25.0f);
+	meshes["box"].set_material(mat);
+	// Green tetra
+	mat.set_diffuse(vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	meshes["tetra"].set_material(mat);
+	// Blue pyramid
+	mat.set_diffuse(vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	meshes["pyramid"].set_material(mat);
+	// Yellow disk
+	mat.set_diffuse(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	meshes["disk"].set_material(mat);
+	// Magenta cylinder
+	mat.set_diffuse(vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	meshes["cylinder"].set_material(mat);
+	// Cyan sphere
+	mat.set_diffuse(vec4(0.0f, 1.0f, 1.0f, 1.0f));
+	meshes["sphere"].set_material(mat);
+	// White torus
+	mat.set_diffuse(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	meshes["torus"].set_material(mat);
   // *********************************
 
   // Load texture

@@ -19,8 +19,8 @@ bool load_content() {
 
   // Set the transforms for meshes for Penrose triangle
 	meshes["box1"].get_transform().position += vec3(-0.5f, 0.0f, 0.0f);
-  meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -3.5f);
-  meshes["box3"].get_transform().position += vec3(-3.0f, 3.0f, 0.0f);
+  meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
+  meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
 
   // Load texture
   tex = texture("textures/check_1.png");
@@ -37,12 +37,6 @@ bool load_content() {
   cam.set_target(vec3(0.0f, 0.0f, 0.0f));
   auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
   cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
-
-	// ----------------------------- Othographic camera test -----------------------------
-	/*glm::ortho(0.0f, static_cast<float>(renderer::get_screen_width())*3.0f / 4.0f, static_cast<float>(renderer::get_screen_height())*3.0f / 4.0f, 0.0f, 2.414f, 1000.0f);
-	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
-	cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);*/
-	// -----------------------------------------------------------------------------------
   
   return true;
 
@@ -75,12 +69,10 @@ bool render() {
 		// Create MVP matrix
 		auto M = m.get_transform().get_transform_matrix();
 		auto V = cam.get_view();
-		//auto P = cam.get_projection();
+		auto P = cam.get_projection();
 		// ----------------------------- Othographic camera test -----------------------------
-		//auto P = glm::ortho(0.0f, static_cast<float>(renderer::get_screen_width())*3.0f / 4.0f, static_cast<float>(renderer::get_screen_height())*3.0f / 4.0f, 0.0f, 2.414f, 1000.0f);
-		//auto P = glm::ortho(-16.0f, 16.0f, 9.0f, -9.0f, 2.414f, 1000.0f);
 		float zoom = 100.0f;
-		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 		// Set MVP matrix uniform

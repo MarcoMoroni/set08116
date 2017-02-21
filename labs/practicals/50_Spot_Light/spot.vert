@@ -26,7 +26,7 @@ void main() {
   gl_Position = MVP * vec4(position_in, 1.0);
   // *********************************
   // Output other values to fragment shader
-	position = vec3(M * vec4(position_in, 1.0));
+	position = vec3(M * vec4(position_in, 1.0f));
   normal = N * normal_in;
   tex_coord = tex_coord_in;
   // *********************************
