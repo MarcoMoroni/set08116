@@ -49,7 +49,7 @@ void main() {
   // Calculate spot light intensity
 	float intensity = pow(max(dot(-1 * spot.direction, light_dir), 0.0f), spot.power);
   // Calculate light colour
-	vec4 light_colour = intensity * spot.light_colour / k_att;
+	vec4 light_colour = (intensity / k_att) * spot.light_colour;
   light_colour.a = 1.0f;
   // Calculate view direction
 	vec3 view_dir = normalize(eye_pos - position);
