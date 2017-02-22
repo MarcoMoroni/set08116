@@ -78,9 +78,9 @@ vec4 calculate_point(in point_light point, in material mat, in vec3 position, in
   // Calculate final colour - remember alpha
   primary.a = 1;
   secondary.a = 1;
-  colour = primary * tex_colour + secondary;
+  vec4 colour_return = primary * tex_colour + secondary;
   // *********************************
-  return colour;
+  return colour_return;
 }
 
 // Spot light calculation
@@ -94,28 +94,29 @@ vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in ve
   // Calculate attenuation value
 	float k_att = spot.constant + (spot.linear * d) + (spot.quadratic * d * d);
   // Calculate spot light intensity
-	float intensity = pow(max(dot(-1 * spot.direction, light_dir), 0.0f), spot.power);
+	float intensity = pow(max(dot(-1.0f * spot.direction, light_dir), 0.0f), spot.power);
   // Calculate light colour
-	spot.light_colour.a = 1.0f;
+	vec4 light_colour = (intensity / k_att) * spot.light_colour;
+	//spot.light_colour.a = 1.0f;
   // Now use standard phong shading but using calculated light colour and direction
   // - note no ambient
 	// Calculate diffuse component
 	float kd = max(dot(normal, light_dir), 0.0);
-  vec4 diffuse = kd * (mat.diffuse_reflection * spot.light_colour);
+  vec4 diffuse = kd * (mat.diffuse_reflection * light_colour);
   // Calculate half vector
   vec3 H = normalize(light_dir + view_dir);
   // Calculate specular component
   float ks = pow(max(dot(H, normal), 0.0f), mat.shininess);
-  vec4 specular = ks * (spot.light_colour * mat.specular_reflection);
+  vec4 specular = ks * (light_colour * mat.specular_reflection);
   // Calculate primary colour component
   vec4 primary = mat.emissive + diffuse;
   vec4 secondary = specular;
   // Calculate final colour - remember alpha
   primary.a = 1;
   secondary.a = 1;
-  colour = primary * tex_colour + secondary;
+   vec4 colour_return = primary * tex_colour + secondary;
   // *********************************
-  return colour;
+  return colour_return;
 }
 
 void main() {
