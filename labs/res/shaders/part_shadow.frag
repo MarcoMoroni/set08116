@@ -14,8 +14,8 @@ float calculate_shadow(in sampler2D shadow_map, in vec4 light_space_pos)
 	}
     float z = 0.5 * proj_coords.z + 0.5;
 	// *********************************
-    // Now sample the shadow map
-
+  // Now sample the shadow map
+	float depth = texture(shadow_map, shadow_tex_coords).x;
 	// *********************************
     // Check if depth is in range.  Add a slight epsilon for precision
     if (depth == 0.0){

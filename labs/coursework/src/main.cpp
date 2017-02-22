@@ -37,9 +37,9 @@ bool load_content() {
 	meshes["teapot"] = mesh(geometry("models/teapot.obj"));
 
   // Set the transforms for meshes for Penrose triangle
-	//meshes["box1"].get_transform().position += vec3(-0.5f, 0.0f, 0.0f);
-  //meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
-  //meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
+	meshes["box1"].get_transform().position += vec3(-0.5f, 0.0f, 0.0f);
+  meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
+  meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
 	meshes["teapot"].get_transform().scale *= vec3(0.05f);
 	meshes["teapot"].get_transform().position += vec3(-5.0f, 0.0f, 6.0f);
 
@@ -180,10 +180,10 @@ bool render() {
 		// Create MVP matrix
 		auto M = m.get_transform().get_transform_matrix();
 		auto V = cam.get_view();
-		auto P = cam.get_projection();
+		//auto P = cam.get_projection();
 		// ----------------------------- Othographic camera test -----------------------------
-		//float zoom = 100.0f;
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		float zoom = 100.0f;
+		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
