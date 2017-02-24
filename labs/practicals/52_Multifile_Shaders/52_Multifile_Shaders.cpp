@@ -215,10 +215,7 @@ bool render() {
 		glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(cam.get_position()));
     // Render mesh
 		renderer::render(m);
-    // *********************************
-
-    // Render mesh
-    renderer::render(m);
+    // *********************************;
   }
 
   return true;

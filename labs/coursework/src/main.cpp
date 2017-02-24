@@ -7,15 +7,15 @@ using namespace glm;
 
 map<string, mesh> meshes;
 effect eff;
-//target_camera cam;
 std::array<texture, 3> textures;
-directional_light light;
 
-// ----- test -----
-free_camera cam;
+directional_light light;
+vector<point_light> points(1);
+vector<spot_light> spots(1);
+
+free_camera free_cam;
 double cursor_x = 0.0;
 double cursor_y = 0.0;
-//-----------------
 
 bool initialise() {
 
@@ -30,6 +30,9 @@ bool initialise() {
 
 bool load_content() {
 
+	// Create plane mesh
+	meshes["plane"] = mesh(geometry_builder::create_plane());
+
   // Create boxes for Penrose triangle
   meshes["box1"] = mesh(geometry_builder::create_box(vec3(4.0f, 1.0f, 1.0f)));
   meshes["box2"] = mesh(geometry_builder::create_box(vec3(1.0f, 1.0f, 4.0f)));
@@ -40,11 +43,23 @@ bool load_content() {
 	meshes["box1"].get_transform().position += vec3(-0.5f, 0.0f, 0.0f);
   meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
   meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
-	meshes["teapot"].get_transform().scale *= vec3(0.05f);
+	meshes["teapot"].get_transform().scale *= vec3(0.1f);
 	meshes["teapot"].get_transform().position += vec3(-5.0f, 0.0f, 6.0f);
 
+	material mat;
+
+	// Box
+	meshes["box"] = mesh(geometry_builder::create_box());
+	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
+	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -30.0f));;
+	mat.set_emissive(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	mat.set_specular(vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//mat.set_diffuse(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	mat.set_shininess(25.0f);
+	meshes["box"].set_material(mat);
+
 	// Load textures
-	textures[0] = texture("textures/check_1.png");
+	textures[0] = texture("textures/checker.png");
 	textures[1] = texture("textures/check_2.png");
 	textures[2] = texture("textures/check_3.png");
 
@@ -56,20 +71,44 @@ bool load_content() {
 	// Light direction (1.0, 1.0, -1.0)
 	light.set_direction(vec3(1.0f, 1.0f, -1.0f));
 
-  // Load in shaders
-  //eff.add_shader("shaders/texture.vert", GL_VERTEX_SHADER);
-  //eff.add_shader("shaders/texture.frag", GL_FRAGMENT_SHADER);
-	eff.add_shader("shaders/gouraud.vert", GL_VERTEX_SHADER);
-	eff.add_shader("shaders/gouraud.frag", GL_FRAGMENT_SHADER);
+	// -----------------------------------------------------------------------------
+	// Set lighting values
+	// *********************************
+	// Point 0, Position (-25, 5, -15)
+	// Red, 20 range
+	points[0].set_position(vec3(-25.0f, 5.0f, -15.0f));
+	points[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	points[0].set_range(20.0f);
+	// Spot 4,Position (-17.5, 15, -25)
+	// Blue,Direction (0, -1, 0)*/
+	// 30 range,1.0 power
+	spots[0].set_position(vec3(-17.5f, 15.0f, -25.0f));
+	spots[0].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	spots[0].set_direction(normalize(vec3(1.0f, 0.0f, 1.0f)));
+	spots[0].set_range(90.0f);
+	spots[0].set_power(1.0f);
+	// -----------------------------------------------------------------------------
+
+	// Load in shaders
+	eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
+
+	// Name of fragment shaders required
+	vector<string> frag_shaders{ "shaders/shader.frag",
+		"shaders/direction.frag", 
+		"shaders/point.frag",
+		"shaders/spot.frag"/*,
+		"shaders/part_normal_map.frag",
+		"shaders/part_shadow.frag"*/ };
+	eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
 
   // Build effect
   eff.build();
 
   // Set camera properties
-  cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
-  cam.set_target(vec3(0.0f, 0.0f, 0.0f));
+  free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
+	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
   auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
-  cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
+	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
   
   return true;
 
@@ -79,10 +118,10 @@ bool update(float delta_time) {
 
   // Set some camera positions
   if (glfwGetKey(renderer::get_window(), '1')) {
-		cam.set_position(vec3(-10.0f, 10.0f, 10.0f));
+		free_cam.set_position(vec3(-10.0f, 10.0f, 10.0f));
   }
   if (glfwGetKey(renderer::get_window(), '2')) {
-	  cam.set_position(vec3(10.0f, 20.0f, 20.0f));
+		free_cam.set_position(vec3(10.0f, 20.0f, 20.0f));
   }
 
 	// The ratio of pixels to rotation - remember the fov
@@ -109,7 +148,7 @@ bool update(float delta_time) {
 	// Rotate cameras by delta
 	// delta_y - x-axis rotation
 	// delta_x - y-axis rotation
-	cam.rotate(-delta_x, delta_y);
+	free_cam.rotate(-delta_x, delta_y);
 
 	// Use keyboard to move the camera - WSAD
 	vec3 dir;
@@ -127,47 +166,23 @@ bool update(float delta_time) {
 	}
 
 	// Move camera
-	cam.move(dir);
+	free_cam.move(dir);
 
 	// Update the camera
-	cam.update(delta_time);
+	free_cam.update(delta_time);
 
 	// Update cursor pos
 	cursor_x = current_x;
 	cursor_y = current_y;
 
   // Update the camera
-  cam.update(delta_time);
+	free_cam.update(delta_time);
 
   return true;
 
 }
 
 bool render() {
-
-  /*// Render meshes
-  for (auto &e : meshes) {
-		auto m = e.second;
-		// Bind effect
-		renderer::bind(eff);
-		// Create MVP matrix
-		auto M = m.get_transform().get_transform_matrix();
-		auto V = cam.get_view();
-		auto P = cam.get_projection();
-		// ----------------------------- Othographic camera test -----------------------------
-		//float zoom = 100.0f;
-		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
-		// -----------------------------------------------------------------------------------
-		auto MVP = P * V * M;
-		// Set MVP matrix uniform
-		glUniformMatrix4fv(eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
-		// Bind texture to renderer
-		renderer::bind(textures[1], 0);
-		// Set the texture value for the shader here
-		glUniform1i(eff.get_uniform_location("tex"), 0);
-		// Render mesh
-		renderer::render(m);
-	}*/
 
 	// Render meshes
 	for (auto &e : meshes) {
@@ -179,11 +194,11 @@ bool render() {
 
 		// Create MVP matrix
 		auto M = m.get_transform().get_transform_matrix();
-		auto V = cam.get_view();
-		//auto P = cam.get_projection();
+		auto V = free_cam.get_view();
+		auto P = free_cam.get_projection();
 		// ----------------------------- Othographic camera test -----------------------------
-		float zoom = 100.0f;
-		auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
+		//float zoom = 100.0f;
+		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
 		// -----------------------------------------------------------------------------------
 		auto MVP = P * V * M;
 
@@ -199,17 +214,23 @@ bool render() {
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
 
+		// Bind point lights
+		renderer::bind(points, "points");
+
+		// Bind spot lights
+		renderer::bind(spots, "spots");
+
 		// Bind light
 		renderer::bind(light, "light");
 
 		// Bind texture
-		renderer::bind(textures[1], 0);
+		renderer::bind(textures[0], 0);
 
 		// Set tex uniform
 		glUniform1i(eff.get_uniform_location("tex"), 0);
 
 		// Set eye position - Get this from active camera
-		glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(cam.get_position()));
+		glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
 
 		// Render mesh
 		renderer::render(m);

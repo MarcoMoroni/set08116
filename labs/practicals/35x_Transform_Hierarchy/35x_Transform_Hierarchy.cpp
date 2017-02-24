@@ -78,7 +78,7 @@ bool render() {
   for (size_t i = 0; i < meshes.size(); i++) {
     // *********************************
     // SET M to be the usual mesh  transform matrix
-		auto M = meshes[0].get_transform().get_transform_matrix();
+		auto M = meshes[i].get_transform().get_transform_matrix();
     // *********************************
 
     // Apply the heirarchy chain
