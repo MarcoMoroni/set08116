@@ -33,7 +33,7 @@ bool load_content() {
 	// Create plane mesh
 	meshes["plane"] = mesh(geometry_builder::create_plane());
 
-  // Create boxes for Penrose triangle
+  /*// Create boxes for Penrose triangle
   meshes["box1"] = mesh(geometry_builder::create_box(vec3(4.0f, 1.0f, 1.0f)));
   meshes["box2"] = mesh(geometry_builder::create_box(vec3(1.0f, 1.0f, 4.0f)));
   meshes["box3"] = mesh(geometry_builder::create_box(vec3(1.0f, 3.0f, 1.0f)));
@@ -44,7 +44,17 @@ bool load_content() {
   meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
   meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
 	meshes["teapot"].get_transform().scale *= vec3(0.1f);
-	meshes["teapot"].get_transform().position += vec3(-5.0f, 0.0f, 6.0f);
+	meshes["teapot"].get_transform().position += vec3(-5.0f, 0.0f, 6.0f);*/
+
+	// Torus 1
+	meshes["torus1"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 4.0f));
+
+	// Torus 2
+	meshes["torus2"] = mesh(geometry_builder::create_torus(60, 20, 0.25f, 5.0f));
+
+	// Torus 3
+	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.3f, 6.0f));
+	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 0.0f);
 
 	material mat;
 
@@ -73,7 +83,6 @@ bool load_content() {
 
 	// -----------------------------------------------------------------------------
 	// Set lighting values
-	// *********************************
 	// Point 0, Position (-25, 5, -15)
 	// Red, 20 range
 	points[0].set_position(vec3(-25.0f, 5.0f, -15.0f));
@@ -175,6 +184,11 @@ bool update(float delta_time) {
 	cursor_x = current_x;
 	cursor_y = current_y;
 
+	// Rotate the torus
+	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
+	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>()) * delta_time);
+	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
+
   // Update the camera
 	free_cam.update(delta_time);
 
@@ -193,9 +207,19 @@ bool render() {
 		renderer::bind(eff);
 
 		// Create MVP matrix
-		auto M = m.get_transform().get_transform_matrix();
 		auto V = free_cam.get_view();
 		auto P = free_cam.get_projection();
+		auto M = m.get_transform().get_transform_matrix();
+		// Hierarchy
+		if (e.first == "torus2")
+		{
+			M = meshes["torus3"].get_transform().get_transform_matrix() * M;
+		}
+		else if (e.first == "torus1")
+		{
+			M = meshes["torus3"].get_transform().get_transform_matrix() * meshes["torus2"].get_transform().get_transform_matrix() * M;
+		}
+		
 		// ----------------------------- Othographic camera test -----------------------------
 		//float zoom = 100.0f;
 		//auto P = glm::ortho(-static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_width()) / zoom, static_cast<float>(renderer::get_screen_height()) / zoom, -static_cast<float>(renderer::get_screen_height()) / zoom, 2.414f, 1000.0f);
