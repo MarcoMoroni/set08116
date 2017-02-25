@@ -52,10 +52,10 @@ bool load_content() {
 	meshes["torus1"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 4.0f));
 
 	// Torus 2
-	meshes["torus2"] = mesh(geometry_builder::create_torus(60, 20, 0.25f, 5.0f));
+	meshes["torus2"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 5.0f));
 
 	// Torus 3
-	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.3f, 6.0f));
+	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 6.0f));
 	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 0.0f);
 
 
@@ -74,6 +74,8 @@ bool load_content() {
 	meshes["box"].set_material(mat);
 
 
+
+	//// Textures
 
 	// Load textures
 	textures["test"] = texture("textures/checker.png");
@@ -94,6 +96,7 @@ bool load_content() {
 	// Directional
 	light.set_ambient_intensity(vec4(0.3f, 0.3f, 0.3f, 1.0f));
 	light.set_light_colour(vec4(1.0f, 1.0f, 0.8f, 1.0f));
+	//light.set_direction(normalize(vec3(1.0f, 1.0f, -1.0f))); // ?
 	light.set_direction(vec3(1.0f, 1.0f, -1.0f));
 
 	// Point 0
@@ -118,8 +121,8 @@ bool load_content() {
 		"shaders/direction.frag", 
 		"shaders/point.frag",
 		"shaders/spot.frag"/*,
-		"shaders/part_normal_map.frag",
-		"shaders/part_shadow.frag"*/ };
+		"shaders/normal_map.frag",
+		"shaders/shadow.frag"*/ };
 	eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
 
   // Build effect
@@ -197,10 +200,10 @@ bool update(float delta_time) {
 	cursor_y = current_y;
 
 	// Rotate the torus
-	meshes["teapot"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
-	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
-	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>()) * delta_time);
-	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
+	meshes["teapot"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
+	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
+	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 4) * delta_time);
+	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
 
   // Update the camera
 	free_cam.update(delta_time);
@@ -232,10 +235,6 @@ bool render() {
 		{
 			M = meshes["torus3"].get_transform().get_transform_matrix() * meshes["torus2"].get_transform().get_transform_matrix() * M;
 		}
-		/*else if (e.first == "teapot")
-		{
-			M = meshes["torus1"].get_transform().get_transform_matrix() * M;
-		}*/
 		
 		// ----------------------------- Othographic camera test -----------------------------
 		//float zoom = 100.0f;
