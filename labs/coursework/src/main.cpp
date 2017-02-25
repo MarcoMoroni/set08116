@@ -7,7 +7,9 @@ using namespace glm;
 
 map<string, mesh> meshes;
 effect eff;
-std::array<texture, 3> textures;
+map<string, texture> textures;
+
+map<string, string> textures_link;
 
 directional_light light;
 vector<point_light> points(1);
@@ -33,6 +35,11 @@ bool load_content() {
 	// Create plane mesh
 	meshes["plane"] = mesh(geometry_builder::create_plane());
 
+	// Box
+	meshes["box"] = mesh(geometry_builder::create_box());
+	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
+	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -30.0f));;
+
   /*// Create boxes for Penrose triangle
   meshes["box1"] = mesh(geometry_builder::create_box(vec3(4.0f, 1.0f, 1.0f)));
   meshes["box2"] = mesh(geometry_builder::create_box(vec3(1.0f, 1.0f, 4.0f)));
@@ -56,24 +63,34 @@ bool load_content() {
 	meshes["torus3"] = mesh(geometry_builder::create_torus(60, 20, 0.3f, 6.0f));
 	meshes["torus3"].get_transform().position += vec3(0.0f, 7.0f, 0.0f);
 
+
+
+	// Set materials
 	material mat;
 
-	// Box
-	meshes["box"] = mesh(geometry_builder::create_box());
-	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
-	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -30.0f));;
+	mat.set_shininess(100.0f);
+	meshes["plane"].set_material(mat);
+
 	mat.set_emissive(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	mat.set_specular(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	//mat.set_diffuse(vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	mat.set_shininess(25.0f);
 	meshes["box"].set_material(mat);
 
-	// Load textures
-	textures[0] = texture("textures/checker.png");
-	textures[1] = texture("textures/check_2.png");
-	textures[2] = texture("textures/check_3.png");
 
-	// Set lighting values
+
+	// Load textures
+	textures["test"] = texture("textures/checker.png");
+	textures["floor"] = texture("textures/floor.jpg");
+	textures["gold"] = texture("textures/gold.jpg");
+
+	// Link textures to meshes
+	textures_link["torus1"] = "gold";
+	textures_link["torus2"] = "gold";
+	textures_link["torus3"] = "gold";
+	textures_link["plane"] = "floor";
+
+	// Set lighting values [NOT WORKING ?]
 	// ambient intensity (0.3, 0.3, 0.3)
 	light.set_ambient_intensity(vec4(0.3f, 0.3f, 0.3f, 1.0f));
 	// Light colour white
@@ -84,10 +101,10 @@ bool load_content() {
 	// -----------------------------------------------------------------------------
 	// Set lighting values
 	// Point 0, Position (-25, 5, -15)
-	// Red, 20 range
-	points[0].set_position(vec3(-25.0f, 5.0f, -15.0f));
-	points[0].set_light_colour(vec4(1.0f, 0.0f, 0.0f, 1.0f));
-	points[0].set_range(20.0f);
+	// White, 20 range
+	points[0].set_position(vec3(-10.0f, 5.0f, -10.0f));
+	points[0].set_light_colour(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	points[0].set_range(30.0f);
 	// Spot 4,Position (-17.5, 15, -25)
 	// Blue,Direction (0, -1, 0)*/
 	// 30 range,1.0 power
@@ -248,7 +265,14 @@ bool render() {
 		renderer::bind(light, "light");
 
 		// Bind texture
-		renderer::bind(textures[0], 0);
+		if (textures_link.find(e.first) != textures_link.end())
+		{
+			renderer::bind(textures[textures_link[e.first]], 0);
+		}
+		else
+		{
+			renderer::bind(textures["test"], 0);
+		}
 
 		// Set tex uniform
 		glUniform1i(eff.get_uniform_location("tex"), 0);

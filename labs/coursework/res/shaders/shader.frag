@@ -89,7 +89,7 @@ void main() {
 	vec4 texture_colour = texture(tex, tex_coord);
 
   // Calculate directional light colour
-	calculate_direction(light,  mat, normal, view_dir, texture_colour);
+	colour += calculate_direction(light,  mat, normal, view_dir, texture_colour);
 
   // Sum point lights
 	for (int i = 0; i < 1; ++i)
