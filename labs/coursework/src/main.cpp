@@ -32,6 +32,10 @@ bool initialise() {
 
 bool load_content() {
 
+
+
+	//// Meshes
+
 	// Create plane mesh
 	meshes["plane"] = mesh(geometry_builder::create_plane());
 
@@ -40,18 +44,9 @@ bool load_content() {
 	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
 	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -30.0f));;
 
-  /*// Create boxes for Penrose triangle
-  meshes["box1"] = mesh(geometry_builder::create_box(vec3(4.0f, 1.0f, 1.0f)));
-  meshes["box2"] = mesh(geometry_builder::create_box(vec3(1.0f, 1.0f, 4.0f)));
-  meshes["box3"] = mesh(geometry_builder::create_box(vec3(1.0f, 3.0f, 1.0f)));
+  // Teapot
 	meshes["teapot"] = mesh(geometry("models/teapot.obj"));
-
-  // Set the transforms for meshes for Penrose triangle
-	meshes["box1"].get_transform().position += vec3(-0.5f, 0.0f, 0.0f);
-  meshes["box2"].get_transform().position += vec3(2.0f, 0.0f, -1.5f);
-  meshes["box3"].get_transform().position += vec3(-3.0f, 1.0f, 0.0f);
-	meshes["teapot"].get_transform().scale *= vec3(0.1f);
-	meshes["teapot"].get_transform().position += vec3(-5.0f, 0.0f, 6.0f);*/
+	meshes["teapot"].get_transform().scale *= vec3(0.04f);
 
 	// Torus 1
 	meshes["torus1"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 4.0f));
@@ -65,7 +60,8 @@ bool load_content() {
 
 
 
-	// Set materials
+	//// Set materials
+
 	material mat;
 
 	mat.set_shininess(100.0f);
@@ -89,31 +85,30 @@ bool load_content() {
 	textures_link["torus2"] = "gold";
 	textures_link["torus3"] = "gold";
 	textures_link["plane"] = "floor";
+	textures_link["teapot"] = "gold";
 
-	// Set lighting values [NOT WORKING ?]
-	// ambient intensity (0.3, 0.3, 0.3)
+
+
+	//// Set lighting values
+
+	// Directional
 	light.set_ambient_intensity(vec4(0.3f, 0.3f, 0.3f, 1.0f));
-	// Light colour white
-	light.set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	// Light direction (1.0, 1.0, -1.0)
+	light.set_light_colour(vec4(1.0f, 1.0f, 0.8f, 1.0f));
 	light.set_direction(vec3(1.0f, 1.0f, -1.0f));
 
-	// -----------------------------------------------------------------------------
-	// Set lighting values
-	// Point 0, Position (-25, 5, -15)
-	// White, 20 range
+	// Point 0
 	points[0].set_position(vec3(-10.0f, 5.0f, -10.0f));
 	points[0].set_light_colour(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	points[0].set_range(30.0f);
-	// Spot 4,Position (-17.5, 15, -25)
-	// Blue,Direction (0, -1, 0)*/
-	// 30 range,1.0 power
+
+	// Spot 0
 	spots[0].set_position(vec3(-17.5f, 15.0f, -25.0f));
 	spots[0].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
 	spots[0].set_direction(normalize(vec3(1.0f, 0.0f, 1.0f)));
 	spots[0].set_range(90.0f);
 	spots[0].set_power(1.0f);
-	// -----------------------------------------------------------------------------
+
+
 
 	// Load in shaders
 	eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
@@ -202,6 +197,7 @@ bool update(float delta_time) {
 	cursor_y = current_y;
 
 	// Rotate the torus
+	meshes["teapot"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
 	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
 	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>()) * delta_time);
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>(), 0.0f, 0.0f) * delta_time);
@@ -232,10 +228,14 @@ bool render() {
 		{
 			M = meshes["torus3"].get_transform().get_transform_matrix() * M;
 		}
-		else if (e.first == "torus1")
+		else if (e.first == "torus1" || e.first == "teapot")
 		{
 			M = meshes["torus3"].get_transform().get_transform_matrix() * meshes["torus2"].get_transform().get_transform_matrix() * M;
 		}
+		/*else if (e.first == "teapot")
+		{
+			M = meshes["torus1"].get_transform().get_transform_matrix() * M;
+		}*/
 		
 		// ----------------------------- Othographic camera test -----------------------------
 		//float zoom = 100.0f;
