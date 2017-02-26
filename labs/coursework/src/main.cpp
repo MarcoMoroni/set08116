@@ -8,6 +8,7 @@ using namespace glm;
 map<string, mesh> meshes;
 effect eff;
 map<string, texture> textures;
+texture normal_map;
 
 map<string, string> textures_link;
 
@@ -89,6 +90,9 @@ bool load_content() {
 	textures_link["plane"] = "floor";
 	textures_link["teapot"] = "gold";
 
+	// Normal map
+	normal_map = texture("textures/floor_norm.jpg");
+
 
 
 	//// Set lighting values
@@ -117,13 +121,21 @@ bool load_content() {
 	eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
 
 	// Name of fragment shaders required
-	vector<string> frag_shaders{ "shaders/shader.frag",
-		"shaders/direction.frag", 
-		"shaders/point.frag",
-		"shaders/spot.frag"/*,
-		"shaders/normal_map.frag",
-		"shaders/shadow.frag"*/ };
-	eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
+	//vector<string> frag_shaders{ "shaders/shader.frag",
+		//"shaders/direction.frag", 
+		//"shaders/point.frag",
+		//"shaders/spot.frag",
+		//"shaders/normal_map.frag"/*,
+		//"shaders/shadow.frag"*/ };
+	//eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
+
+	// ------------------- DEBUG -------------------
+	eff.add_shader("shaders/shader.frag", GL_FRAGMENT_SHADER);
+	eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
+	eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
+	eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
+	eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
+	// ---------------------------------------------
 
 	// Build effect
 	eff.build();
@@ -275,6 +287,23 @@ bool render() {
 
 		// Set tex uniform
 		glUniform1i(eff.get_uniform_location("tex"), 0);
+
+		// Normal map
+		if (/*e.first == "torus1" ||
+			e.first == "torus2" ||
+			e.first == "torus3" ||
+			e.first == "teapot"*/
+			e.first == "plane")
+		{
+
+			// Bind normal_map
+			renderer::bind(normal_map, 1);
+
+			// Set normal_map uniform
+			glUniform1i(eff.get_uniform_location("normal_map"), 1);
+
+		}
+		
 
 		// Set eye position - Get this from active camera
 		glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));

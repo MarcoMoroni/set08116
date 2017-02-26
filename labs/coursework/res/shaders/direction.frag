@@ -36,7 +36,7 @@ vec4 calculate_direction(in directional_light light, in material mat, in vec3 no
 	vec3 H = normalize(light.light_dir + view_dir);
 
 	// Calculate specular component
-	float ks = pow(max(dot(H, normal), 0.0f), mat.shininess);
+	float ks = pow(max(dot(H, normal), 0.0), mat.shininess);
   vec4 specular = ks * (light.light_colour * mat.specular_reflection);
 
 	// Calculate colour to return

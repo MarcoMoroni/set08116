@@ -39,11 +39,11 @@ vec4 calculate_spot(in spot_light spot, in material mat, in vec3 position, in ve
 	float k_att = spot.constant + (spot.linear * d) + (spot.quadratic * d * d);
 
 	// Calculate spot light intensity
-	float intensity = pow(max(dot(-1 * spot.direction, light_dir), 0.0f), spot.power);
+	float intensity = pow(max(dot(-1.0 * spot.direction, light_dir), 0.0), spot.power);
 
 	// Calculate light colour:  (intensity / attenuation) * light_colour
 	vec4 light_colour = (intensity / k_att) * spot.light_colour;
-  light_colour.a = 1.0f;
+	light_colour.a = 1.0;
 	
 	// Now use standard phong shading but using calculated light colour and direction
 	vec4 diffuse = (mat.diffuse_reflection * light_colour) * max(dot(normal, light_dir), 0.0);
