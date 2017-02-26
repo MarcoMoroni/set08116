@@ -44,7 +44,7 @@ bool load_content() {
 	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
 	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -30.0f));;
 
-  // Teapot
+	// Teapot
 	meshes["teapot"] = mesh(geometry("models/teapot.obj"));
 	meshes["teapot"].get_transform().scale *= vec3(0.04f);
 
@@ -125,28 +125,28 @@ bool load_content() {
 		"shaders/shadow.frag"*/ };
 	eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
 
-  // Build effect
-  eff.build();
+	// Build effect
+	eff.build();
 
-  // Set camera properties
-  free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
+	// Set camera properties
+	free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
 	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
-  auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
+	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
 	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
   
-  return true;
+	return true;
 
 }
 
 bool update(float delta_time) {
 
-  // Set some camera positions
-  if (glfwGetKey(renderer::get_window(), '1')) {
+	// Set some camera positions
+	if (glfwGetKey(renderer::get_window(), '1')) {
 		free_cam.set_position(vec3(-10.0f, 10.0f, 10.0f));
-  }
-  if (glfwGetKey(renderer::get_window(), '2')) {
+	}
+	if (glfwGetKey(renderer::get_window(), '2')) {
 		free_cam.set_position(vec3(10.0f, 20.0f, 20.0f));
-  }
+	}
 
 	// The ratio of pixels to rotation - remember the fov
 	static double ratio_width = quarter_pi<float>() / static_cast<float>(renderer::get_screen_width());
@@ -205,10 +205,10 @@ bool update(float delta_time) {
 	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 4) * delta_time);
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
 
-  // Update the camera
+	// Update the camera
 	free_cam.update(delta_time);
 
-  return true;
+	return true;
 
 }
 
@@ -290,16 +290,16 @@ bool render() {
 
 void main() {
 
-  // Create application
-  app application("Graphics Coursework");
+	// Create application
+	app application("Graphics Coursework");
 
-  // Set load content, update and render methods
-  application.set_load_content(load_content);
+	// Set load content, update and render methods
+	application.set_load_content(load_content);
 	application.set_initialise(initialise);
-  application.set_update(update);
-  application.set_render(render);
+	application.set_update(update);
+	application.set_render(render);
 
-  // Run application
-  application.run();
+	// Run application
+	application.run();
 
 }
