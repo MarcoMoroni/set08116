@@ -25,6 +25,7 @@ bool load_content() {
 	//meshes["teapot"].get_transform().rotate(vec3(-half_pi<float>(), 0.0f, 0.0f));
   // Scale the teapot - (0.1, 0.1, 0.1)
 	meshes["teapot"].get_transform().scale *= vec3(0.1f);
+	meshes["teapot"].get_transform().position += vec3(0.0f, 7.0f, 0.0f);
   // *********************************
 
   // Load texture
@@ -53,9 +54,9 @@ bool load_content() {
   // Pos (20, 30, 0), White
   // Direction (-1, -1, 0) normalized
   // 50 range, 10 power
-  spot.set_position(vec3(30.0f, 20.0f, 0.0f));
+  spot.set_position(vec3(0.0f, 30.0f, 0.0f));
   spot.set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f));
-  spot.set_direction(normalize(vec3(-1.0f, -1.0f, 0.0f)));
+  spot.set_direction(normalize(vec3(0.0f, -1.0f, 0.0f)));
   spot.set_range(500.0f);
   spot.set_power(10.0f);
 

@@ -6,7 +6,7 @@ using namespace graphics_framework;
 using namespace glm;
 
 map<string, mesh> meshes;
-effect eff;
+effect main_eff;
 map<string, texture> textures;
 texture normal_map;
 
@@ -15,6 +15,9 @@ map<string, string> textures_link;
 directional_light light;
 vector<point_light> points(1);
 vector<spot_light> spots(1);
+
+effect shadow_eff;
+shadow_map shadow;
 
 free_camera free_cam;
 double cursor_x = 0.0;
@@ -32,6 +35,13 @@ bool initialise() {
 }
 
 bool load_content() {
+	
+
+
+	//// Shadows
+
+	// Create shadow map- use screen size
+	shadow = shadow_map(renderer::get_screen_width(), renderer::get_screen_height());
 
 
 
@@ -91,17 +101,17 @@ bool load_content() {
 	textures_link["teapot"] = "gold";
 
 	// Normal map
-	normal_map = texture("textures/floor_norm.jpg");
+	normal_map = texture("textures/gold_norm.jpg");
 
 
 
 	//// Set lighting values
 
 	// Directional
-	light.set_ambient_intensity(vec4(0.3f, 0.3f, 0.3f, 1.0f));
+	light.set_ambient_intensity(vec4(0.2f, 0.2f, 0.2f, 1.0f));
 	light.set_light_colour(vec4(1.0f, 1.0f, 0.8f, 1.0f));
-	//light.set_direction(normalize(vec3(1.0f, 1.0f, -1.0f))); // ?
-	light.set_direction(vec3(1.0f, 1.0f, -1.0f));
+	light.set_direction(normalize(vec3(1.0f, 1.0f, -1.0f))); // ?
+	//light.set_direction(vec3(1.0f, 1.0f, -1.0f));
 
 	// Point 0
 	points[0].set_position(vec3(-10.0f, 5.0f, -10.0f));
@@ -109,16 +119,16 @@ bool load_content() {
 	points[0].set_range(30.0f);
 
 	// Spot 0
-	spots[0].set_position(vec3(-17.5f, 15.0f, -25.0f));
+	spots[0].set_position(vec3(-2.0f, 1.0f, -20.0f));
 	spots[0].set_light_colour(vec4(0.0f, 0.0f, 1.0f, 1.0f));
-	spots[0].set_direction(normalize(vec3(1.0f, 0.0f, 1.0f)));
-	spots[0].set_range(90.0f);
-	spots[0].set_power(1.0f);
+	spots[0].set_direction(normalize(vec3(-1.0f, -1.0f, 0.0f)));
+	spots[0].set_range(500.0f);
+	spots[0].set_power(5.0f);
 
 
 
 	// Load in shaders
-	eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
+	main_eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
 
 	// Name of fragment shaders required
 	//vector<string> frag_shaders{ "shaders/shader.frag",
@@ -129,16 +139,21 @@ bool load_content() {
 		//"shaders/shadow.frag"*/ };
 	//eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
 
-	// ------------------- DEBUG -------------------
-	eff.add_shader("shaders/shader.frag", GL_FRAGMENT_SHADER);
-	eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
-	eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
-	eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
-	eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
-	// ---------------------------------------------
+	// ------------------- TO FIX -------------------
+	main_eff.add_shader("shaders/shader.frag", GL_FRAGMENT_SHADER);
+	main_eff.add_shader("shaders/direction.frag", GL_FRAGMENT_SHADER);
+	main_eff.add_shader("shaders/point.frag", GL_FRAGMENT_SHADER);
+	main_eff.add_shader("shaders/spot.frag", GL_FRAGMENT_SHADER);
+	main_eff.add_shader("shaders/normal_map.frag", GL_FRAGMENT_SHADER);
+	main_eff.add_shader("shaders/shadow.frag", GL_FRAGMENT_SHADER);
 
-	// Build effect
-	eff.build();
+	shadow_eff.add_shader("shaders/shader_for_shadow.vert", GL_VERTEX_SHADER);
+	shadow_eff.add_shader("shaders/shader_for_shadow.frag", GL_FRAGMENT_SHADER);
+	// ----------------------------------------------
+
+	// Build effects
+	main_eff.build();
+	shadow_eff.build();
 
 	// Set camera properties
 	free_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
@@ -159,6 +174,10 @@ bool update(float delta_time) {
 	if (glfwGetKey(renderer::get_window(), '2')) {
 		free_cam.set_position(vec3(10.0f, 20.0f, 20.0f));
 	}
+
+	// Update the shadow map properties from the spot light
+	shadow.light_position = spots[0].get_position();
+	shadow.light_dir = spots[0].get_direction();
 
 	// The ratio of pixels to rotation - remember the fov
 	static double ratio_width = quarter_pi<float>() / static_cast<float>(renderer::get_screen_width());
@@ -224,15 +243,67 @@ bool update(float delta_time) {
 
 }
 
+/*bool render() {
+
+	renderWithNormal();
+
+	renderWithoutNormal();
+
+}*/
+
 bool render() {
+
+	// Set render target to shadow map
+	/*renderer::set_render_target(shadow);
+
+	// Clear depth buffer bit
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	// Set render mode to cull face
+	glCullFace(GL_FRONT);
+
+	mat4 LightProjectionMat = perspective<float>(half_pi<float>(), renderer::get_screen_aspect(), 0.1f, 1000.f);
+
+	// Bind shader
+	renderer::bind(shadow_eff);
 
 	// Render meshes
 	for (auto &e : meshes) {
 
 		auto m = e.second;
 
-		// Bind effect
-		renderer::bind(eff);
+		// Create MVP matrix
+		auto M = m.get_transform().get_transform_matrix();
+		
+		// View matrix taken from shadow map
+		auto V = shadow.get_view();
+		auto P = LightProjectionMat;
+		auto MVP = P * V * M;
+
+		// Set MVP matrix uniform
+		glUniformMatrix4fv(shadow_eff.get_uniform_location("MVP"),	// Location of uniform
+			1,														// Number of values - 1 mat4
+			GL_FALSE,												// Transpose the matrix?
+			value_ptr(MVP));										// Pointer to matrix data
+
+		// Render mesh
+		renderer::render(m);
+
+	}
+	
+	// Set render target back to the screen
+	renderer::set_render_target();
+
+	// Set cull face to back
+	glCullFace(GL_BACK);*/
+
+	// Bind effect
+	renderer::bind(main_eff);
+
+	// Render meshes
+	for (auto &e : meshes) {
+
+		auto m = e.second;
 
 		// Create MVP matrix
 		auto V = free_cam.get_view();
@@ -255,13 +326,20 @@ bool render() {
 		auto MVP = P * V * M;
 
 		// Set MVP matrix uniform
-		glUniformMatrix4fv(eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+		glUniformMatrix4fv(main_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
 
 		// Set M matrix uniform
-		glUniformMatrix4fv(eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
+		glUniformMatrix4fv(main_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
 		// Set N matrix uniform - remember - 3x3 matrix
-		glUniformMatrix3fv(eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(m.get_transform().get_normal_matrix()));
+		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(m.get_transform().get_normal_matrix()));
+
+		// Set light transform
+		/*auto lM = m.get_transform().get_transform_matrix();
+		auto lV = shadow.get_view();
+		auto lP = LightProjectionMat;
+		auto lMVP = lP * lV * lM;
+		glUniformMatrix4fv(main_eff.get_uniform_location("lightMVP"), 1, GL_FALSE, value_ptr(lMVP));*/
 
 		// Bind material
 		renderer::bind(m.get_material(), "mat");
@@ -286,7 +364,11 @@ bool render() {
 		}
 
 		// Set tex uniform
-		glUniform1i(eff.get_uniform_location("tex"), 0);
+		glUniform1i(main_eff.get_uniform_location("tex"), 0);
+
+		// --- DEBUG --------------------------------------
+		//cout << "------" << e.first << endl;
+		// ------------------------------------------------
 
 		// Normal map
 		if (/*e.first == "torus1" ||
@@ -296,17 +378,27 @@ bool render() {
 			e.first == "plane")
 		{
 
+			// --- DEBUG --------------------------------------
+			//cout << "--------------" << e.first << endl;
+			// ------------------------------------------------
+
 			// Bind normal_map
 			renderer::bind(normal_map, 1);
 
 			// Set normal_map uniform
-			glUniform1i(eff.get_uniform_location("normal_map"), 1);
+			glUniform1i(main_eff.get_uniform_location("normal_map"), 1);
 
 		}
 		
 
 		// Set eye position - Get this from active camera
-		glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+		glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+
+		// Bind shadow map texture - use texture unit 1
+		/*renderer::bind(shadow.buffer->get_depth(), 1);
+
+		//Set the shadow_map uniform
+		glUniform1i(main_eff.get_uniform_location("shadow_map"), 1);*/
 
 		// Render mesh
 		renderer::render(m);
@@ -316,6 +408,8 @@ bool render() {
   return true;
 	
 }
+
+
 
 void main() {
 
