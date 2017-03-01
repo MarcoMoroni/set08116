@@ -19,7 +19,9 @@ vector<spot_light> spots(1);
 effect shadow_eff;
 shadow_map shadow;
 
-free_camera free_cam;
+int camera_switch = 0;
+target_camera target_cam;	// camera_switch = 0
+free_camera free_cam;		// camera_switch = 1
 double cursor_x = 0.0;
 double cursor_y = 0.0;
 
@@ -78,7 +80,7 @@ bool load_content() {
 	mat.set_shininess(100.0f);
 	meshes["plane"].set_material(mat);
 
-	mat.set_emissive(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	mat.set_emissive(vec4(0.2f, 0.2f, 0.2f, 1.0f));
 	mat.set_specular(vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	//mat.set_diffuse(vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	mat.set_shininess(25.0f);
@@ -160,6 +162,9 @@ bool load_content() {
 	free_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
 	free_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
+	target_cam.set_position(vec3(-3.0f, 5.0f, 20.0f));
+	target_cam.set_target(vec3(0.0f, 0.0f, 0.0f));
+	target_cam.set_projection(quarter_pi<float>(), aspect, 2.414f, 1000.0f);
   
 	return true;
 
@@ -179,65 +184,109 @@ bool update(float delta_time) {
 	shadow.light_position = spots[0].get_position();
 	shadow.light_dir = spots[0].get_direction();
 
-	// The ratio of pixels to rotation - remember the fov
-	static double ratio_width = quarter_pi<float>() / static_cast<float>(renderer::get_screen_width());
-	static double ratio_height =
-		(quarter_pi<float>() *
-		(static_cast<float>(renderer::get_screen_height()) / static_cast<float>(renderer::get_screen_width()))) /
-		static_cast<float>(renderer::get_screen_height());
-
-	double current_x;
-	double current_y;
-	
-	// Get the current cursor position
-	glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
-
-	// Calculate delta of cursor positions from last frame
-	double delta_x = current_x - cursor_x;
-	double delta_y = current_y - cursor_y;
-
-	// Multiply deltas by ratios - gets actual change in orientation
-	delta_x *= ratio_width;
-	delta_y *= ratio_height;
-
-	// Rotate cameras by delta
-	// delta_y - x-axis rotation
-	// delta_x - y-axis rotation
-	free_cam.rotate(-delta_x, delta_y);
-
-	// Use keyboard to move the camera - WSAD
-	vec3 dir;
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
-		dir += vec3(0.0f, 0.0f, 0.5f);
+	// Change cameras
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_1))
+	{
+		camera_switch = 0;
 	}
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
-		dir += vec3(-0.5f, 0.0f, 0.0f);
-	}
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
-		dir += vec3(0.5f, 0.0f, 0.0f);
-	}
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
-		dir += vec3(0.0f, 0.0f, -0.5f);
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
+	{
+		camera_switch = 1;
+		target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
 	}
 
-	// Move camera
-	free_cam.move(dir);
 
-	// Update the camera
-	free_cam.update(delta_time);
 
-	// Update cursor pos
-	cursor_x = current_x;
-	cursor_y = current_y;
+	// Change controls for different cameras
+	switch (camera_switch)
+	{
+	case(0): // Free camera
+	{
+		// The ratio of pixels to rotation - remember the fov
+		static double ratio_width = quarter_pi<float>() / static_cast<float>(renderer::get_screen_width());
+		static double ratio_height =
+			(quarter_pi<float>() *
+			(static_cast<float>(renderer::get_screen_height()) / static_cast<float>(renderer::get_screen_width()))) /
+			static_cast<float>(renderer::get_screen_height());
+
+		double current_x;
+		double current_y;
+
+		// Get the current cursor position
+		glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
+
+		// Calculate delta of cursor positions from last frame
+		double delta_x = current_x - cursor_x;
+		double delta_y = current_y - cursor_y;
+
+		// Multiply deltas by ratios - gets actual change in orientation
+		delta_x *= ratio_width;
+		delta_y *= ratio_height;
+
+		// Rotate cameras by delta
+		// delta_y - x-axis rotation
+		// delta_x - y-axis rotation
+		free_cam.rotate(-delta_x, delta_y);
+
+		// Use keyboard to move the camera - WSAD
+		vec3 dir;
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_W)) {
+			dir += vec3(0.0f, 0.0f, 0.5f);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_A)) {
+			dir += vec3(-0.5f, 0.0f, 0.0f);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_D)) {
+			dir += vec3(0.5f, 0.0f, 0.0f);
+		}
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_S)) {
+			dir += vec3(0.0f, 0.0f, -0.5f);
+		}
+
+		// Move camera
+		free_cam.move(dir);
+
+		// Update the camera
+		free_cam.update(delta_time);
+
+		// Update cursor pos
+		cursor_x = current_x;
+		cursor_y = current_y;
+
+		break;
+	}
+
+	case(1): // Target camera
+	{
+
+		// Use keyboard to change camera target
+		// down - (50, 10, 50)
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN)) {
+			target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
+			target_cam.set_target(vec3(-10.0f, 2.5f, -30.0f));
+		}
+		// up - (-50, 10, 50)
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP)) {
+			target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
+			target_cam.set_target(meshes["teapot"].get_transform().position);
+		}
+
+		// Update the camera
+		target_cam.update(delta_time);
+
+		break;
+	}
+
+	default:
+		break;
+
+	}
 
 	// Rotate the torus
 	meshes["teapot"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
 	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
 	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 4) * delta_time);
 	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
-
-	// Update the camera
-	free_cam.update(delta_time);
 
 	return true;
 
@@ -250,6 +299,41 @@ bool update(float delta_time) {
 	renderWithoutNormal();
 
 }*/
+
+mat4 getV()
+{
+	switch (camera_switch)
+	{
+	case(0): // Free camera
+		return free_cam.get_view();
+		break;
+	case(1):
+		return target_cam.get_view();
+		break;
+	default:
+		return free_cam.get_view();
+		break;
+	}
+
+}
+
+mat4 getP()
+{
+
+	switch (camera_switch)
+	{
+	case(0): // Free camera
+		return free_cam.get_projection();
+		break;
+	case(1):
+		return target_cam.get_projection();
+		break;
+	default:
+		return free_cam.get_projection();
+		break;
+	}
+
+}
 
 bool render() {
 
@@ -306,8 +390,8 @@ bool render() {
 		auto m = e.second;
 
 		// Create MVP matrix
-		auto V = free_cam.get_view();
-		auto P = free_cam.get_projection();
+		auto V = getV();
+		auto P = getP();
 		auto M = m.get_transform().get_transform_matrix();
 		// Hierarchy
 		if (e.first == "torus2")
@@ -332,7 +416,17 @@ bool render() {
 		glUniformMatrix4fv(main_eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
 		// Set N matrix uniform - remember - 3x3 matrix
-		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(m.get_transform().get_normal_matrix()));
+		// ******* NOT WORKING PROPERLY *******
+		auto N = m.get_transform().get_normal_matrix();
+		if (e.first == "torus2")
+		{
+			N = meshes["torus3"].get_transform().get_normal_matrix() * N;
+		}
+		else if (e.first == "torus1" || e.first == "teapot")
+		{
+			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
+		}
+		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
 
 		// Set light transform
 		/*auto lM = m.get_transform().get_transform_matrix();
@@ -392,7 +486,15 @@ bool render() {
 		
 
 		// Set eye position - Get this from active camera
-		glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+		if (camera_switch == 0)
+		{
+			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(free_cam.get_position()));
+		}
+		else if (camera_switch == 1)
+		{
+			glUniform3fv(main_eff.get_uniform_location("eye_pos"), 1, value_ptr(target_cam.get_position()));
+		}
+		
 
 		// Bind shadow map texture - use texture unit 1
 		/*renderer::bind(shadow.buffer->get_depth(), 1);
