@@ -112,13 +112,13 @@ void main() {
 	// Sum point lights
 	for (int i = 0; i < 1; ++i)
 	{
-		colour += calculate_point(points[i], mat, position, normal, view_dir, texture_colour);
+		colour += calculate_point(points[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
 	// Sum spot lights
 	for(int i = 0; i < 1; ++i)
 	{
-		colour += calculate_spot(spots[i], mat, position, normal, view_dir, texture_colour);
+		colour += calculate_spot(spots[i], mat, position, final_normal, view_dir, texture_colour);
 	}
 
 	// Scale colour by shade
