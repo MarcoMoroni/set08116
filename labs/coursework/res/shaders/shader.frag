@@ -123,6 +123,7 @@ void main() {
 
 	// Scale colour by shade
 	colour *= shade_factor;
+	//colour = 0.05*colour + vec4(normal,1.0);
 	colour.a = 1.0f;
-
+	
 }

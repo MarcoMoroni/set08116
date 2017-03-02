@@ -10,7 +10,8 @@ effect main_eff;
 map<string, texture> textures;
 map<string, texture> normal_maps;
 
-map<string, string> textures_link;
+map<string, string> textures_link; // map.first is the mesh name
+                                   // map.second is the texture name
 
 directional_light light;
 vector<point_light> points(1);
@@ -20,8 +21,8 @@ effect shadow_eff;
 shadow_map shadow;
 
 int camera_switch = 0;
-target_camera target_cam;	// camera_switch = 0
-free_camera free_cam;		// camera_switch = 1
+target_camera target_cam;   // camera_switch = 0
+free_camera free_cam;       // camera_switch = 1
 double cursor_x = 0.0;
 double cursor_y = 0.0;
 
@@ -55,12 +56,10 @@ bool load_content() {
 	// Box
 	meshes["box"] = mesh(geometry_builder::create_box());
 	meshes["box"].get_transform().scale = vec3(5.0f, 5.0f, 5.0f);
-	meshes["box"].get_transform().translate(vec3(-10.0f, 2.5f, -10.0f));;
+	meshes["box"].get_transform().translate(vec3(-15.0f, 2.5f, -10.0f));;
 
-	// Teapot
-	//meshes["teapot"] = mesh(geometry("models/teapot.obj"));
-	//meshes["teapot"].get_transform().scale *= vec3(0.04f);
-	meshes["teapot"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
+	// Hourglass
+	meshes["hourglass"] = mesh(geometry_builder::create_cylinder(1.0f, 40.0f, vec3(7.0f, 0.1f, 7.0f)));
 
 	// Torus 1
 	meshes["torus1"] = mesh(geometry_builder::create_torus(60, 20, 0.2f, 4.0f));
@@ -75,17 +74,24 @@ bool load_content() {
 
 
 	//// Set materials
+	{
+		material mat;
 
-	material mat;
+		mat.set_specular(vec4(0.2f, 0.2f, 0.2f, 1.0f));
+		mat.set_shininess(500.0f);
+		meshes["box"].set_material(mat);
+		meshes["plane"].set_material(mat);
+	}
+	{
+		material mat;
 
-	mat.set_shininess(100.0f);
-	meshes["plane"].set_material(mat);
-
-	mat.set_emissive(vec4(0.2f, 0.2f, 0.2f, 1.0f));
-	mat.set_specular(vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	//mat.set_diffuse(vec4(1.0f, 0.0f, 0.0f, 1.0f));
-	mat.set_shininess(25.0f);
-	meshes["box"].set_material(mat);
+		mat.set_specular(vec4(0.8f, 0.8f, 0.8f, 1.0f));
+		mat.set_shininess(25.0f);
+		meshes["torus1"].set_material(mat);
+		meshes["torus2"].set_material(mat);
+		meshes["torus3"].set_material(mat);
+		meshes["hourglass"].set_material(mat);
+	}
 
 
 
@@ -101,7 +107,7 @@ bool load_content() {
 	textures_link["torus2"] = "gold";
 	textures_link["torus3"] = "gold";
 	textures_link["plane"] = "floor";
-	textures_link["teapot"] = "gold";
+	textures_link["hourglass"] = "gold";
 	textures_link["box"] = "floor";
 
 	// Normal map
@@ -114,18 +120,17 @@ bool load_content() {
 
 	// Directional
 	light.set_ambient_intensity(vec4(0.1f, 0.1f, 0.1f, 1.0f));
-	light.set_light_colour(vec4(0.8f, 1.0f, 1.0f, 1.0f));
+	light.set_light_colour(vec4(0.1f, 0.2f, 0.2f, 1.0f));
 	light.set_direction(normalize(vec3(1.0f, 1.0f, -1.0f)));
 
 	// Point 0
-	//points[0].set_position(vec3(-10.0f, 5.0f, -10.0f));
-	points[0].set_position(vec3(-10.0f, 9.0f, 0.0f));
-	points[0].set_light_colour(vec4(0.1f, 0.4f, 0.0f, 1.0f));
+	points[0].set_position(vec3(10.0f, 9.0f, 0.0f));
+	points[0].set_light_colour(vec4(0.9f, 0.3f, 0.12f, 1.0f));
 	points[0].set_range(30.0f);
 
 	// Spot 0
 	spots[0].set_position(vec3(-2.0f, 3.0f, -10.0f));
-	spots[0].set_light_colour(vec4(1.0f, 0.8f, 0.8f, 1.0f));
+	spots[0].set_light_colour(vec4(0.64f, 1.0f, 0.25f, 1.0f));
 	spots[0].set_direction(normalize(vec3(-1.0f, 0.0f, 0.0f)));
 	spots[0].set_range(50.0f);
 	spots[0].set_power(0.5f);
@@ -136,13 +141,13 @@ bool load_content() {
 	main_eff.add_shader("shaders/shader.vert", GL_VERTEX_SHADER);
 
 	// Name of fragment shaders required
-	//vector<string> frag_shaders{ "shaders/shader.frag",
-		//"shaders/direction.frag", 
-		//"shaders/point.frag",
-		//"shaders/spot.frag",
-		//"shaders/normal_map.frag"/*,
-		//"shaders/shadow.frag"*/ };
-	//eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);
+	/*vector<string> frag_shaders{ "shaders/shader.frag",
+		"shaders/direction.frag", 
+		"shaders/point.frag",
+		"shaders/spot.frag",
+		"shaders/normal_map.frag",
+		"shaders/shadow.frag" };
+	main_eff.add_shader(frag_shaders, GL_FRAGMENT_SHADER);*/
 
 	// ------------------- TO FIX -------------------
 	main_eff.add_shader("shaders/shader.frag", GL_FRAGMENT_SHADER);
@@ -195,7 +200,7 @@ bool update(float delta_time) {
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_2))
 	{
 		camera_switch = 1;
-		target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
+		target_cam.set_position(vec3(-20.0f, 10.0f, -20.0f));
 	}
 
 
@@ -265,13 +270,11 @@ bool update(float delta_time) {
 		// Use keyboard to change camera target
 		// down - (50, 10, 50)
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN)) {
-			target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
-			target_cam.set_target(vec3(-10.0f, 2.5f, -30.0f));
+			target_cam.set_target(meshes["box"].get_transform().position);
 		}
 		// up - (-50, 10, 50)
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP)) {
-			target_cam.set_position(vec3(50.0f, 10.0f, 50.0f));
-			target_cam.set_target(meshes["teapot"].get_transform().position);
+			target_cam.set_target(meshes["hourglass"].get_transform().position);
 		}
 
 		// Update the camera
@@ -286,10 +289,10 @@ bool update(float delta_time) {
 	}
 
 	// Rotate the torus
-	meshes["teapot"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
+	meshes["hourglass"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
 	meshes["torus1"].get_transform().rotate(vec3(half_pi<float>() / 4, 0.0f, 0.0f) * delta_time);
-	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 3.5) * delta_time); // Change to 3.5
-	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time); // Change to 3
+	meshes["torus2"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>() / 3.5) * delta_time);
+	meshes["torus3"].get_transform().rotate(vec3(half_pi<float>() / 3, 0.0f, 0.0f) * delta_time);
 
 	return true;
 
@@ -401,7 +404,7 @@ bool render() {
 		{
 			M = meshes["torus3"].get_transform().get_transform_matrix() * M;
 		}
-		else if (e.first == "torus1" || e.first == "teapot")
+		else if (e.first == "torus1" || e.first == "hourglass")
 		{
 			M = meshes["torus3"].get_transform().get_transform_matrix() * meshes["torus2"].get_transform().get_transform_matrix() * M;
 		} 
@@ -421,13 +424,20 @@ bool render() {
 		// Set N matrix uniform - remember - 3x3 matrix
 		// ******* NOT WORKING PROPERLY *******
 		auto N = m.get_transform().get_normal_matrix();
+		if (e.first == "torus1" || e.first == "torus2" || e.first == "torus3")
+		{
+			N = mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(N));
+		}
+		//auto N = mat3(rotate(mat4(1.0),90.0f,vec3(1,0,0)) * mat4 (m.get_transform().get_normal_matrix()));
 		if (e.first == "torus2")
 		{
 			N = meshes["torus3"].get_transform().get_normal_matrix() * N;
+			//N = (mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(meshes["torus3"].get_transform().get_normal_matrix()))) * N;
 		}
-		else if (e.first == "torus1" || e.first == "teapot")
+		else if (e.first == "torus1" || e.first == "hourglass")
 		{
 			N = meshes["torus3"].get_transform().get_normal_matrix() * meshes["torus2"].get_transform().get_normal_matrix() * N;
+			//N = mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(meshes["torus3"].get_transform().get_normal_matrix())) * mat3(rotate(mat4(1.0), 90.0f, vec3(-1, 0, 0)) * mat4(meshes["torus2"].get_transform().get_normal_matrix())) * N;
 		}
 		glUniformMatrix3fv(main_eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(N));
 
