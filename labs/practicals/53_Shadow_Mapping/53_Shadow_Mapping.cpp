@@ -70,9 +70,16 @@ bool update(float delta_time) {
   meshes["teapot"].get_transform().rotate(vec3(0.0f, 0.0f, half_pi<float>()) * delta_time);
 
   // *********************************
+<<<<<<< HEAD
   // Update the shadow map properties from the spot light
 	shadow.light_position = spot.get_position();
 	shadow.light_dir = spot.get_direction();
+=======
+  // Update the shadow map light_position from the spot light
+
+  // do the same for light_dir property
+
+>>>>>>> c3231faad293b77d9eea3c1c790a04f8ff3c1113
   // *********************************
 
   // Press s to save
@@ -90,9 +97,15 @@ bool render() {
   // Set render target to shadow map
 	renderer::set_render_target(shadow);
   // Clear depth buffer bit
+<<<<<<< HEAD
 	glClear(GL_DEPTH_BUFFER_BIT);
   // Set render mode to cull face
 	glCullFace(GL_FRONT);
+=======
+
+  // Set face cull mode to front
+
+>>>>>>> c3231faad293b77d9eea3c1c790a04f8ff3c1113
   // *********************************
 
   // Bind shader
@@ -118,9 +131,15 @@ bool render() {
 
   // *********************************
   // Set render target back to the screen
+<<<<<<< HEAD
 	renderer::set_render_target();
   // Set cull face to back
 	glCullFace(GL_BACK);
+=======
+
+  // Set face cull mode to back
+
+>>>>>>> c3231faad293b77d9eea3c1c790a04f8ff3c1113
   // *********************************
 
   return true;
