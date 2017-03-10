@@ -14,8 +14,8 @@ bool load_content() {
   // Create a sphere
   sphere = mesh(geometry_builder::create_sphere(25, 25));
 
-  array<string, 6> filenames = {"textures/sahara_ft.jpg", "textures/sahara_bk.jpg", "textures/sahara_up.jpg",
-                                "textures/sahara_dn.jpg", "textures/sahara_rt.jpg", "textures/sahara_lf.jpg"};
+  array<string, 6> filenames = { "textures/FullMoonFront2048.png", "textures/FullMoonBack2048.png", "textures/FullMoonUp2048.png",
+	  "textures/FullMoonDown2048.png", "textures/FullMoonRight2048.png", "textures/FullMoonLeft2048.png" };
   // *********************************
   // Create cube_map
   cube_map = cubemap(filenames);

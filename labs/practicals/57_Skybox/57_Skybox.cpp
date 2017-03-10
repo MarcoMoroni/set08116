@@ -37,7 +37,7 @@ bool load_content() {
   sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
   sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
   // Build effect
-  eff.build();
+  sky_eff.build();
   // *********************************
 
   // Set camera properties
@@ -71,9 +71,11 @@ bool render() {
 	auto V = cam.get_view();
 	auto P = cam.get_projection();
 	auto MVP = P * V * M;
-	renderer::bind(cube_map, 0);
+	
   // Set MVP matrix uniform
 	glUniformMatrix4fv(sky_eff.get_uniform_location("MVP"), 1, GL_FALSE, value_ptr(MVP));
+	// Bind cube maps
+	renderer::bind(cube_map, 0);
   // Set cubemap uniform
 	glUniform1i(sky_eff.get_uniform_location("cubemap"), 0);
 
