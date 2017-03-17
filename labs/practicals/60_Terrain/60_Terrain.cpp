@@ -44,7 +44,7 @@ void generate_terrain(geometry &geom, const texture &height_map, unsigned int wi
     for (int z = 0; z < height_map.get_height(); ++z) {
       // *********************************
       // Calculate z position of point
-		point.z = -(depth / 2.0f) + (depth_point * z);
+		point.z = -(depth / 2.0f) + (depth_point * static_cast<float>(z));
       // *********************************
       // Y position based on red component of height map data
       point.y = data[(z * height_map.get_width()) + x].y * height_scale;
@@ -92,19 +92,19 @@ void generate_terrain(geometry &geom, const texture &height_map, unsigned int wi
 
     // Normal is normal(cross product) of these two sides
     // *********************************
- 
+	vec3 n = cross(side2, side1);
 
     // Add to normals in the normal buffer using the indices for the triangle
-
-
-
+	normals[idx1] = normals[idx1] + n;
+	normals[idx2] = normals[idx2] + n;
+	normals[idx3] = normals[idx3] + n;
     // *********************************
   }
 
   // Normalize all the normals
   for (auto &n : normals) {
     // *********************************
-	  
+	  n = normalize(n);
     // *********************************
   }
 
@@ -126,20 +126,20 @@ void generate_terrain(geometry &geom, const texture &height_map, unsigned int wi
 
       // *********************************
       // Sum the components of the vector
-
+	  float total = tex_weight.x + tex_weight.y + tex_weight.z + tex_weight.a;
       // Divide weight by sum
-
+	  tex_weight = tex_weight / total;
       // Add tex weight to weights
-
+	  tex_weights.push_back(tex_weight); 
       // *********************************
     }
   }
 
   // Add necessary buffers to the geometry
   geom.add_buffer(positions, BUFFER_INDEXES::POSITION_BUFFER);
-  //geom.add_buffer(normals, BUFFER_INDEXES::NORMAL_BUFFER);
-  //geom.add_buffer(tex_coords, BUFFER_INDEXES::TEXTURE_COORDS_0);
-  //geom.add_buffer(tex_weights, BUFFER_INDEXES::TEXTURE_COORDS_1);
+  geom.add_buffer(normals, BUFFER_INDEXES::NORMAL_BUFFER);
+  geom.add_buffer(tex_coords, BUFFER_INDEXES::TEXTURE_COORDS_0);
+  geom.add_buffer(tex_weights, BUFFER_INDEXES::TEXTURE_COORDS_1);
   geom.add_index_buffer(indices);
 
   // Delete data
@@ -260,14 +260,14 @@ bool render() {
   glUniform1i(eff.get_uniform_location("tex[0]"), 0);
   // *********************************
    //Bind Tex[1] to TU 1, set uniform
-
-
+  renderer::bind(tex[1], 1);
+  glUniform1i(eff.get_uniform_location("tex[1]"), 1);
   // Bind Tex[2] to TU 2, set uniform
-
-
+  renderer::bind(tex[2], 2);
+  glUniform1i(eff.get_uniform_location("tex[2]"), 2);
   // Bind Tex[3] to TU 3, set uniform
-
-
+  renderer::bind(tex[3], 3);
+  glUniform1i(eff.get_uniform_location("tex[3]"), 3);
   // *********************************
   // Render terrain
   renderer::render(terr);
