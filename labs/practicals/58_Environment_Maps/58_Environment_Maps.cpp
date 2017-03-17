@@ -30,8 +30,8 @@ bool load_content() {
   // Build effect
   eff.build();
   // Load in skybox effect
-  sky_eff.add_shader("57_Skybox/shader.vert", GL_VERTEX_SHADER);
-  sky_eff.add_shader("57_Skybox/shader.frag", GL_FRAGMENT_SHADER);
+  sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
+  sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
   // Build effect
   sky_eff.build();
 
@@ -72,7 +72,9 @@ bool render() {
   // Set cubemap uniform
 	glUniform1i(sky_eff.get_uniform_location("cubemap"), 0);
   // Render skybox
+	glDisable(GL_CULL_FACE);
 	renderer::render(skybox);
+	glEnable(GL_CULL_FACE);
   // Enable depth test and depth mask
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
@@ -89,9 +91,9 @@ bool render() {
   // Set M matrix uniform
 	glUniformMatrix4fv(eff.get_uniform_location("M"), 1, GL_FALSE, value_ptr(sphere.get_transform().get_transform_matrix()));
   // Set N matrix uniform
-	glUniformMatrix4fv(eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(sphere.get_transform().get_normal_matrix()));
+	glUniformMatrix3fv(eff.get_uniform_location("N"), 1, GL_FALSE, value_ptr(sphere.get_transform().get_normal_matrix()));
   // Set eye_pos value
-	glUniformMatrix4fv(eff.get_uniform_location("eye_pos"), 1, GL_FALSE, value_ptr(cam.get_position()));
+	glUniform3fv(eff.get_uniform_location("eye_pos"), 1, value_ptr(cam.get_position()));
   // Bind cubemap to TU 0
 	renderer::bind(cube_map, 0);
   // Set cubemap uniform
