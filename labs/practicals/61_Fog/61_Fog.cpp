@@ -173,7 +173,7 @@ bool render() {
     // Set fog density: 0.04f
 	glUniform1f(eff.get_uniform_location("fog_density"), 5.0f);
     // Set fog type: FOG_EXP2
-	glUniform1i(eff.get_uniform_location("fog_type"), 0);
+	glUniform1i(eff.get_uniform_location("fog_type"), 2);
     // *********************************
 
     // Render mesh
