@@ -83,7 +83,7 @@ bool load_content() {
   light.set_direction(vec3(1.0f, 1.0f, -1.0f));
   // Load in shaders
   eff.add_shader("48_Phong_Shading/phong.vert", GL_VERTEX_SHADER);
-  eff.add_shader("47_Phong_Shading/phong.frag", GL_FRAGMENT_SHADER);
+  eff.add_shader("48_Phong_Shading/phong.frag", GL_FRAGMENT_SHADER);
   // Build effect
   eff.build();
   // *********************************
