@@ -25,9 +25,9 @@ uniform vec3 eye_pos;
 uniform sampler2D tex;
 
 // Incoming position
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec3 vertexPosition;
 // Incoming normal
-layout(location = 1) in vec3 normal;
+layout(location = 1) in vec3 transformed_normal;
 // Incoming texture coordinate
 layout(location = 2) in vec2 tex_coord;
 
@@ -38,26 +38,42 @@ void main() {
 
   // *********************************
   // Calculate ambient component
-  vec4 ambient = light.ambient_intensity * mat.diffuse_reflection;
+  vec4 ambient = mat.diffuse_reflection * light.ambient_intensity;
+
   // Calculate diffuse component
-  float kd = max(dot(transformed_normal, light.light_dir), 0.0);
-  vec4 diffuse = kd * (mat.diffuse_reflection * light.light_colour);
+  // Calculate k
+  float diffuseK = max(dot(transformed_normal, light.light_dir),0.0f);
+  
+  // Calculate diffuse
+  vec4 diffuse = diffuseK * mat.diffuse_reflection * light.light_colour;
+
   // Calculate view direction
-  vec3 world_pos = vec3(M * vec4(position, 1.0));
-  vec3 view_dir = normalize(vec3(eye_pos - world_pos));
-  // Calculate half vector
-  vec3 H = normalize(light.light_dir + view_dir);
+  vec3 view_dir = normalize(eye_pos-vertexPosition);
+  
+  // Calculate half vector between view_dir and light_dir
+  vec3 H = normalize(light.light_dir+view_dir);
+
   // Calculate specular component
-  float ks = pow(max(dot(H, transformed_normal), 0.0), mat.shininess);
-  vec4 specular = ks * (light.light_colour * mat.specular_reflection);
+  // Calculate k
+  float specularK = pow(max(dot(transformed_normal, H),0.0f),mat.shininess);
+  
+  // Calculate specular
+  vec4 specular = specularK * (mat.specular_reflection * light.light_colour);
+
   // Sample texture
   vec4 tex_colour = texture(tex, tex_coord);
+
   // Calculate primary colour component
-  primary = ambient + diffuse;
-  secondary = specular;
+  // Set primary
+  vec4 primary = mat.emissive + ambient + diffuse;
+  
+  // Set secondary
+  vec4 secondary = specular;
+
   // Calculate final colour - remember alpha
-  primary.a = 1;
-  secondary.a = 1;
-  colour = primary * tex_colour + secondary;
+  primary.a = 1.0f;
+  secondary.a = 1.0f;
+
+   colour = primary*tex_colour + secondary;
   // *********************************
 }
