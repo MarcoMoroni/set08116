@@ -34,8 +34,8 @@ bool load_content() {
 
   // *********************************
   // Load in skybox effect
-  sky_eff.add_shader("shaders/skybox.vert", GL_VERTEX_SHADER);
-  sky_eff.add_shader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
+  sky_eff.add_shader("57_Skybox/shader.vert", GL_VERTEX_SHADER);
+  sky_eff.add_shader("57_Skybox/shader.frag", GL_FRAGMENT_SHADER);
   // Build effect
   sky_eff.build();
   // *********************************

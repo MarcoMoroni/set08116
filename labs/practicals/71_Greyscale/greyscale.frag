@@ -21,7 +21,8 @@ void main() {
   // Use greyscale to as final colour
   // - ensure alpha is 1
   colour = vec4(i,i,i,1.0);
-  //colour += vec4(0.314,0.169,-0.090,1.0); // sepia
+  colour += vec4(0.314,0.169,-0.090,1.0); // sepia
+  //colour += vec4(0.2, 0.0, 0.2, 1.0); // test
   colour.a = 1.0;
   // *********************************
 }
